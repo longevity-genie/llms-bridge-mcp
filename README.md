@@ -1,5 +1,7 @@
 # llms-bridge-mcp
 
+[![Tests](https://github.com/winternewt/llm-bridge-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/winternewt/llm-bridge-mcp/actions/workflows/test.yml)
+
 An MCP (Model Context Protocol) server to bridge LLM calls via the Model Context Protocol.
 
 ## Installation
