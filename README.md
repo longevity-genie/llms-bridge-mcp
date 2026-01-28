@@ -85,6 +85,50 @@ Call Perplexity Sonar API for web-search enhanced responses.
 
 This tool appears when no API keys are configured. It provides setup instructions.
 
+## Long-Running Task Support
+
+The server implements FastMCP's long-running task pattern, allowing LLM calls to be handled asynchronously when they may take extended time to complete.
+
+### Task Mode
+
+The server is configured with `task_mode="optional"` by default, which provides:
+
+- **Fallback behavior**: Supports async task patterns when the client supports them, but falls back to synchronous operation if not
+- **Polling support**: Tasks are polled every 10 seconds (configurable via `poll_interval` parameter)
+- **Better UX**: Prevents timeouts on long-running LLM operations while maintaining compatibility with all MCP clients
+
+### How It Works
+
+When a tool is called:
+1. If the client supports MCP task protocol, the operation runs asynchronously
+2. The server polls the task status at the configured interval
+3. Results are returned when the LLM completes its response
+4. If the client doesn't support tasks, operations run synchronously as normal
+
+This is particularly useful for:
+- Complex prompts that require extended reasoning
+- Large context processing
+- Multi-step LLM operations
+- Clients that may have shorter timeout windows
+
+### Configuration
+
+To customize task behavior, you can instantiate the server with different parameters:
+
+```python
+from llms_bridge_mcp.server import LLMBridgeMCP
+from datetime import timedelta
+
+# Optional mode (default) - fallback to sync if client doesn't support tasks
+server = LLMBridgeMCP(task_mode="optional", poll_interval=timedelta(seconds=10))
+
+# Required mode - force task-based operation
+server = LLMBridgeMCP(task_mode="required", poll_interval=timedelta(seconds=5))
+
+# Disabled mode - always synchronous
+server = LLMBridgeMCP(task_mode="disabled")
+```
+
 ## Testing
 
 Run tests with pytest:
@@ -153,6 +197,7 @@ uvx --prerelease=allow llms-bridge-mcp@latest sse --host 0.0.0.0 --port 3011
 - **MCP Protocol**: Full Model Context Protocol support via FastMCP
 - **LiteLLM Integration**: Unified interface to multiple LLM providers
 - **Graceful Shutdown**: Proper signal handling for clean exits
+- **Long-Running Task Support**: Optional async task handling with polling for extended LLM operations
 
 ## Project Structure
 

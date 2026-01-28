@@ -6,16 +6,18 @@ import sys
 import signal
 import typer
 
+from datetime import timedelta
 from typing import Any, Optional, Dict, List
 from importlib.metadata import version, PackageNotFoundError
 from fastmcp import FastMCP
+from fastmcp.server.tasks import TaskConfig, TaskMode
 from pydantic import BaseModel, Field
 from litellm import acompletion
 
 
 # Configuration
-DEFAULT_HOST = os.getenv("MCP_HOST", "0.0.0.0")
-DEFAULT_PORT = int(os.getenv("MCP_PORT", "3011"))
+DEFAULT_HOST = os.getenv("MCP_HOST", "127.0.0.1")
+DEFAULT_PORT = int(os.getenv("MCP_PORT", "3012"))
 DEFAULT_TRANSPORT = os.getenv("MCP_TRANSPORT", "streamable-http")
 DEFAULT_TIMEOUT = int(os.getenv("MCP_TIMEOUT", "120"))
 
@@ -44,6 +46,8 @@ class LLMBridgeMCP(FastMCP):
         gemini_api_key: Optional[str] = None,
         perplexity_api_key: Optional[str] = None,
         prefix: str = "llms_bridge_",
+        task_mode: TaskMode = "optional",
+        poll_interval: timedelta = timedelta(seconds=10),
         **kwargs,
     ):
         """Initialize the LLMs Bridge MCP server with FastMCP functionality."""
@@ -56,6 +60,12 @@ class LLMBridgeMCP(FastMCP):
             "PERPLEXITY_API_KEY", ""
         )
         self.prefix = prefix
+        
+        # Configure long-running task support (optional mode for fallback)
+        self.task_config = TaskConfig(
+            mode=task_mode,
+            poll_interval=poll_interval,
+        )
 
         # Set environment variables for litellm
         if self.openai_api_key:
@@ -158,6 +168,7 @@ class LLMBridgeMCP(FastMCP):
             self.tool(
                 name=f"{self.prefix}call_chatgpt",
                 description="Call OpenAI ChatGPT API with a prompt and optional conversation history",
+                task=self.task_config,
             )(self.call_chatgpt)
             has_any_key = True
 
@@ -165,6 +176,7 @@ class LLMBridgeMCP(FastMCP):
             self.tool(
                 name=f"{self.prefix}call_gemini",
                 description="Call Google Gemini API with a prompt and optional conversation history",
+                task=self.task_config,
             )(self.call_gemini)
             has_any_key = True
 
@@ -172,6 +184,7 @@ class LLMBridgeMCP(FastMCP):
             self.tool(
                 name=f"{self.prefix}call_perplexity",
                 description="Call Perplexity Sonar API with a prompt for web-search enhanced responses",
+                task=self.task_config,
             )(self.call_perplexity)
             has_any_key = True
 
@@ -526,12 +539,12 @@ def cli_app_stdio():
 
 def cli_app_sse():
     """Entry point for SSE mode."""
-    sse()
+    sse(host=DEFAULT_HOST, port=DEFAULT_PORT)
 
 
 def cli_app_http():
     """Entry point for HTTP mode."""
-    http()
+    http(host=DEFAULT_HOST, port=DEFAULT_PORT)
 
 
 if __name__ == "__main__":
