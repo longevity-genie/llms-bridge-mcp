@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "llms-bridge-http": {
+      "command": "uvx",
+      "args": [
+        "--prerelease=allow",
+        "llms-bridge-mcp@latest",
+        "http",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "3012"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key-here",
+        "GEMINI_API_KEY": "your-gemini-api-key-here",
+        "PERPLEXITY_API_KEY": "your-perplexity-api-key-here",
+        "MCP_HOST": "0.0.0.0",
+        "MCP_PORT": "3012"
+      }
+    }
+  }
+}

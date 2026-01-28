@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "llms-bridge-local": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/data/sources/llms-bridge-mcp",
+        "run",
+        "stdio"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key-here",
+        "GEMINI_API_KEY": "your-gemini-api-key-here",
+        "PERPLEXITY_API_KEY": "your-perplexity-api-key-here"
+      }
+    }
+  }
+}

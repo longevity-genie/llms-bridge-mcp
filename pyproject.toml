@@ -1,0 +1,48 @@
+[project]
+name = "llms-bridge-mcp"
+version = "0.1.2"
+description = "MCP server to bridge LLM calls via Model Context Protocol"
+readme = "README.md"
+authors = [
+    {name = "Newton Winter", email = "isoutthere@gmail.com"},
+  
+]
+maintainers = [
+    {name = "Anton Kulaga", email = "antonkulaga@gmail.com"},
+    {name = "Newton Winter", email = "isoutthere@gmail.com"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp[tasks]>=3.0.0b1",
+    "pydantic>=2.0.0",
+    "typer>=0.16.0",
+    "httpx>=0.25.0",
+    "litellm>=1.81.4",
+]
+
+[project.scripts]
+llms-bridge-mcp = "llms_bridge_mcp.server:cli_app"
+stdio = "llms_bridge_mcp.server:cli_app_stdio"
+sse = "llms_bridge_mcp.server:cli_app_sse"
+http = "llms_bridge_mcp.server:cli_app_http"
+
+dev = "smithery.cli.dev:main"
+start = "smithery.cli.start:main"
+playground = "smithery.cli.playground:main"
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.smithery]
+server = "llms_bridge_mcp.server:start_mcp_smithery"
+log_level = "warning"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=0.26.0",
+    "python-dotenv>=1.0.0",
+    "ruff>=0.12.0",
+    "smithery>=0.4.2",
+]
